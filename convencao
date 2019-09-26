@@ -1,0 +1,4 @@
+registradores "a1" a "a3" servem para argumentos de procedimentos
+registrador "v1" serve para retorno de um procedimento
+registradores "s" nao podem ser modificados nos procedimentos, por isso devem fazer uso da pilha quando usados nos procedimentos.
+registradores "t" podem ser modificados nos procedimentos (os t são "globais")

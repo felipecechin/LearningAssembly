@@ -54,41 +54,34 @@
   
 main:
 # corpo do procedimento
-    la $s0, backspace
-    lw $s0, 0($s0)
-    la $s1, enter
-    lw $s1, 0($s1)
+    lw $s0, backspace
+    lw $s1, enter
     li $s2, 0
     li $t2, 0
 armazena_vetor:
-    beqz $t2, laco1
+    beqz $t2, laco2
     la $s3, linha_comando
     add $s3, $s3, $s2
     sw $t2, 0($s3)
     addiu $s2, $s2, 4
 imprime_letra:
-    beqz $t2, laco1
-    la    $t0, 0xFFFF0008   # endereço do TCR
-    lw    $t1, 0($t0)       # $t1 <- conteúdo do TCR
+    beqz $t2, laco2
+   	# endereço do TCR
+    lw    $t1, 0xFFFF0008       # $t1 <- conteúdo do TCR
     andi  $t1, $t1, 0x0001  # isolamos o bit menos significativo
     beqz  $t1, imprime_letra
     # escrevemos o carcatere no display
-    la    $t0, 0xFFFF000C   # endereço do TDR
-    sw    $t2, 0($t0)
+    # endereço do TDR
+    sw    $t2, 0xFFFF000C
                         
-    j     laco1    	
-laco1:       
-    # esperamos um caracter no terminal
-    la    $t0, 0xFFFF0000   # endereço do RCR
+    j     laco2    	
 laco2:
-    lw    $t1, 0($t0)       # $t1 <- conteúdo do RCR
+    lw    $t1, 0xFFFF0000       # $t1 <- conteúdo do RCR
     andi  $t1, $t1, 0x0001  # isolamos o bit menos significativo
     beqz  $t1, laco2
-        
-    # lemos o carcater
-    la $t2, 0xFFFF0004
-    lw    $t2, 0($t2)       # $t2 <- caracter do terminal
-    beq $t2, $s0, laco1
+       
+    lw    $t2, 0xFFFF0004       # $t2 <- caracter do terminal
+    beq $t2, $s0, laco2
     bnez $t2, armazena_vetor
 	
     # epílogo    
