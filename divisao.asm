@@ -32,4 +32,3 @@
 	li $v0, 1
 	la $a0, 0($s3)
 	syscall
-	
