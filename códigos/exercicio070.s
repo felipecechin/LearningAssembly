@@ -42,64 +42,51 @@
 #2345678901234567890123456789012345678901234567890123456789012345678901234567890
 #           M     O                 #
 
-#segmento de dados
-.data
-	linha_comando: .space 80
-#segmento de instrucoes
+.text       # segmento de dados
+
 .globl main
-.text
+
+################################################################################    
 main:
-	li $t3, 0
-	j limpa_vetor
+#
+# Subrotina main
+# 
+# Descrição: Esta subrotima lê os caracteres da ferramenta keyboard e
+# escreve na ferramenta display.
+#
+# Argumentos: não existem argumentos para esta subrotina
+###############################################################################
+#  prólogo
+            #
+# corpo do procedimento
 laco1:
-    lw    $t1, 0xFFFF0000       # $t1 <- conteudo do RCR
-    andi  $t1, $t1, 0x0001  # isolamos o bit menos significativo
-    beqz  $t1, laco1 #se for 0, volta ao laco1
-    lw    $t2, 0xFFFF0004       # $t2 <- caracter do terminal
-    beqz $t2, laco1 #se for 0, volta ao laco1
-    beq $t2, 8, exclui_letra_anterior
-    jal armazena_vetor
-    beq $t2, 10, imprime_linha
-	j laco1
-    # epilogo    
-    li    $v0, 10           # servico 10 - exit
-    syscall
-armazena_vetor:
-    la $s0, linha_comando
-    add $s0, $s0, $t3
-    sw $t2, 0($s0)
-    addi $t3, $t3, 4
-    jr $ra
-imprime_linha:
-   	# endereco do TCR
-    lw    $s0, 0xFFFF0008       # $t1 <- conteudo do TCR
-    andi  $s0, $s0, 0x0001  # isolamos o bit menos significativo
-    beqz  $s0, imprime_linha
-    # escrevemos o carcatere no display
-    # endereco do TDR
-    li $s2, 0
-    imprime_linha_loop:
-    	la $s1, linha_comando
-    	add $s1, $s1, $s2
-    	lw $s1, 0($s1)
-    	beqz $s1, main
-    	sw    $s1, 0xFFFF000C
-    	add $s2, $s2, 4	
-    	j imprime_linha_loop
-limpa_vetor:
-	li $s1, 0
-	limpa_vetor_loop:
-    	la $s0, linha_comando
-    	add $s0, $s0, $s1
-    	lw $s2, 0($s0)
-    	beqz $s2, laco1
-    	sw $zero, 0($s0)
-    	add $s1, $s1, 4	
-    	j limpa_vetor_loop
-exclui_letra_anterior:
-	beqz $t3, laco1
-	la $s0, linha_comando
-	add $t3, $t3, -4
-	add $s0, $s0, $t3
-	sw $zero, 0($s0)
-	j laco1
+            
+            # esperamos um caracter no terminal
+            la    $t0, 0xFFFF0000   # endereço do RCR
+laco2:
+            lw    $t1, 0($t0)       # $t1 <- conteúdo do RCR
+            andi  $t1, $t1, 0x0001  # isolamos o bit menos significativo
+            beqz  $t1, laco2
+            
+            # lemos o carcater
+            la    $t0, 0xFFFF0004   # endereço do RDR
+            lw    $t2, 0($t0)       # $t2 <- caracter do terminal
+            
+            # escrevemos o caracter no display
+            
+            # esperamos o display estar livre
+            la    $t0, 0xFFFF0008   # endereço do TCR
+laco3:
+            lw    $t1, 0($t0)       # $t1 <- conteúdo do TCR
+            andi  $t1, $t1, 0x0001  # isolamos o bit menos significativo
+            beqz  $t1, laco3
+            
+            # escrevemos o carcatere no display
+            la    $t0, 0xFFFF000C   # endereço do TDR
+            sw    $t2, 0($t0)
+                                     
+            j     laco1
+# epílogo    
+            li    $v0, 10           # serviço 10 - exit
+            syscall
+
