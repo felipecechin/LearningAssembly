@@ -19,26 +19,52 @@ la   $a1, buffer   # address of buffer to which to read
 li   $a2, 2048     # hardcoded buffer length
 syscall            # read from file
 
-la $s0, buffer
-la $s1, palavra
-li $s2, 0
-proximo_comando:
-	li $s3, 0
-imprime_byte:
-	beq $s3, 4, proximo_comando
-	add $s0, $s0, $s2
-	lbu $s1, ($s0)
-	beq $s1, $s3, continua
-	li $v0, 34
-	add $a0, $s1, $zero
-	syscall
-	addi $s2, $s2, 1
-	addi $s3, $s3, 1
-	j imprime_byte
-	
-
-continua:
+la $a0, buffer
+jal carrega_dados_arquivo
+    
 # Close the file 
 li   $v0, 16       # system call for close file
 move $a0, $s6      # file descriptor to close
 syscall            # close file
+
+li $v0, 10
+syscall
+
+carrega_dados_arquivo:
+    #prologo
+    addiu $sp, $sp, -20
+    sw $s0, 0($sp)
+    sw $ra, 4($sp)
+    sw $s1, 8($sp)
+    sw $s2, 12($sp)
+    sw $s3, 16($sp)
+    
+    #corpo 
+    add $s0, $a0, $zero #$s0 dados do arquivo
+    la $s1, palavra
+    li $s2, 0
+    proximo_comando:
+        li $s3, 0
+    imprime_byte:
+        beq $s3, 4, verifica_palavra
+        verifica_palavra:
+        	la $a0, palavra
+        	jal verifica_palavra_nula
+        	beqz $v0, 
+        continua:
+        	add $s1, $s1, $s3
+        	add $s0, $s0, $s2
+        	lbu $s1, ($s0)
+        	addi $s2, $s2, 1
+        	addi $s3, $s3, 1
+        	j imprime_byte
+    
+    #epilogo
+    carrega_dados_arquivo_fim:
+    	lw $s2, 12($sp) 
+    	lw $s3, 16($sp)
+    	lw $s1, 8($sp)
+    	lw $s0, 0($sp)  
+    	lw $ra, 4($sp)
+    	addiu $sp, $sp, 20
+    	jr $ra
