@@ -75,3 +75,29 @@ carrega_dados_arquivo:
     	lw $ra, 4($sp)
     	addiu $sp, $sp, 24
     	jr $ra
+
+
+verifica_palavra_nula:
+	#prologo
+	addiu $sp, $sp, -4
+	sw $s0, 0($sp)
+	
+	#corpo 
+	lb $s0, 0($a0)
+	bnez $s0, verifica_palavra_nula_retorno
+	lb $s0, 1($a0)
+	bnez $s0, verifica_palavra_nula_retorno
+	lb $s0, 2($a0)
+	bnez $s0, verifica_palavra_nula_retorno
+	lb $s0, 3($a0)
+	bnez $s0, verifica_palavra_nula_retorno
+	li $v0, 1
+	j verifica_palavra_nula_fim
+	verifica_palavra_nula_retorno:
+		li $v0, 0
+		
+	#epilogo
+	verifica_palavra_nula_fim:
+		lw $s0, 0($sp)
+		addiu $sp, $sp, 4
+		jr $ra
