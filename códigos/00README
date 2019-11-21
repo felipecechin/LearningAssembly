@@ -6,6 +6,9 @@ exercicio004.s      trabalhando com índices numéricos. Traduzindo a[2] = a[0] 
 exercicio005.s      trabalhando com índices variáveis. Traduzindo a[k] = a[i] + a[j];
 
 exercicio024.s      ponteiros e índices em conjuntos: zerando um vetor de inteiros
+
+exercicio026.s      programa para calcular a raiz quadrada de um número em ponto flutuante pelo método de Newton
+
 exercicio032.s      tipos: ponteiros
 
 exercicio039.s      exemplo de instruções load e store
