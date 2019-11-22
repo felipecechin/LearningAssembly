@@ -25,7 +25,7 @@ main:
 fatorial:
 #prologo
             addiu $sp, $sp, -8      # ajusta a pilha para receber 2 itens
-            sw    $ra, 4($sp)       # salva o endereço de retorno
+            sw    $ra, 4($sp)       # salva o endereco de retorno
             sw    $a0, 0($sp)       # salva o argumento da funcao
 # corpo do procedimento
             bne   $zero, $a0, n_nao_igual_0 # se n!=0  calcule n*fatorial(n-1)
