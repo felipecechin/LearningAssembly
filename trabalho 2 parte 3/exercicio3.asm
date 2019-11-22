@@ -2,8 +2,6 @@
 	msg_entreNumero: .asciiz "Entre com um numero: "
 	const1: .double 0.4  # constante 0.4, em ponto flutuante
   
-    
-   
 .text
 main:
 	jal leiaNumeroPF  # le um numero em ponto flutuante
@@ -39,44 +37,33 @@ fatorial_epilogo:
 # fim do procedimento fatorial
 ################################################################################    
 
+# procedimento funcao
 funcao:
+	#prologo
+	addiu $sp, $sp, -4
+	sw $ra, 0($sp)
+	
+	#corpo
 	la $t0, const1
 	ldc1 $f10, 0($t0)
-	c.lt.d  $f12, $f10
+	c.lt.d $f12, $f10
     bc1t funcao_retorna_zero          
 	addi $a0, $zero, 3
     jal fatorial
-    mtc1.d $v0, $f12
-  	cvt.d.w $f12, $f12
+    mtc1.d $v0, $f11
+  	cvt.d.w $f12, $f11
     li $v0, 3
     syscall
     j funcao_fim
 	funcao_retorna_zero:
 		li $v0, 0
+		
+	#epilogo
 	funcao_fim:
+		lw $ra, 0($sp)
+		addiu $sp, $sp, 4
 		jr $ra
-	
-	
-exponential: 
-    	addi	$sp,	$sp,	-4
-    	sw	$t0,	4($sp)
-    	move	$t0,	$zero
-    	li	$v0,	1
-    loop: 
-    	beq	$t0,	$a1,	end	# Checks to see if $t0 is equal to $a1 if not
-    					# it continues, if it is it jumps to end
-    	mul	$v0,	$v0,	$a0	# Multiplies the value in $a0 by the value in $v0
-    	addi	$t0,	$t0,	1	# Adds 1 to $t0 and stores it in $t0 because
-    					# $t0 is the loop counter
-    	j	loop			# Jumps to the beginning of the loop to start
-    					# the process over
-    end:
-    	#restore $t0 and the stack
-    	lw	$t0,	4($sp)
-    	addi	$sp,	$sp,	4
-    	jr	$ra
-	
-
+###############################################################################
 
 ###############################################################################
 # imprime uma mensagem, pedindo a entrada de um numero
@@ -86,7 +73,7 @@ leiaNumeroPF:
     la $a0, msg_entreNumero
     li $v0, 4
     syscall
-    li      $v0, 7             # servico para ler um numero em ponto flutuante
+    li $v0, 7             # servico para ler um numero em ponto flutuante
     syscall                    # faz uma chamada ao sistema
-    jr      $ra                # retorna em $f0 numero em ponto flutuante, precisao dupla
+    jr $ra                # retorna em $f0 numero em ponto flutuante, precisao dupla
 ###############################################################################
