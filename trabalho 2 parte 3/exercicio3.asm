@@ -11,7 +11,7 @@ main:
     # $f12 <- x
     jal funcao
     # imprime o valor de resultado da funcao
-    mov.d $f12, $f10
+    mov.d $f12, $f0
     la $a0, msg_resultado_funcao
     li $v0, 4
     syscall
@@ -48,6 +48,7 @@ fatorial_epilogo:
 ################################################################################    
 
 ################################################################################
+# procedimento que calcula o resultado de f(x)
 funcao:
 	#prologo
 	addiu $sp, $sp, -8
@@ -56,50 +57,48 @@ funcao:
 	
 	#corpo
 	la $s0, const
-	ldc1 $f0, 0($s0) # $f0 <- 0.4
-	c.lt.d $f12, $f0 # se $f12 < $f0, seta flag 0 true
-	# $f12 <- contem o valor de X
-	# $f0 <- 0.4
+	ldc1 $f4, 0($s0) # $f4 <- 0.4
+	# $f12 contem o valor de X
+	c.lt.d $f12, $f4 # se $f12 < $f4, seta flag 0 true
     bc1t funcao_retorna_zero # se flag 0 for true, pula para retornar zero
+    # X >= 0.4
 	#busca o resultado de fatorial de 3
 	addi $a0, $zero, 3
     jal fatorial
-    mtc1.d $v0, $f2
-  	cvt.d.w $f2, $f2
-  	# $f2 <- 3!
-  	#busca o resultado de fatorial de 5
+    mtc1.d $v0, $f4
+  	cvt.d.w $f4, $f4 # $f4 <- 3!
+  	# $f12 contem o valor de X, argumento da funcao exponencial
+   	addi $a0, $zero, 3
+   	jal exponencial
+   	mov.d $f6, $f0 # $f6 <- x^3
+   	div.d $f4, $f6, $f4 # $f4 <- (x^3)/3!
+   	#busca o resultado de fatorial de 5
 	addi $a0, $zero, 5
     jal fatorial
-    mtc1.d $v0, $f4
-  	cvt.d.w $f4, $f4
-  	# $f4 <- 5!
-  	#busca o resultado de fatorial de 7
+    mtc1.d $v0, $f6
+  	cvt.d.w $f6, $f6 # $f6 <- 5!
+  	# $f12 contem o valor de X, argumento da funcao exponencial
+   	addi $a0, $zero, 5
+   	jal exponencial
+   	mov.d $f8, $f0 # $f8 <- x^5
+   	div.d $f6, $f8, $f6 # $f6 <- (x^5)/5!
+   	#busca o resultado de fatorial de 7
 	addi $a0, $zero, 7
     jal fatorial
-    mtc1.d $v0, $f6
-  	cvt.d.w $f6, $f6
-  	# $f6 <- 7!
-  	# $f12 contem o valor de X
-   	addi $a1, $zero, 3
+    mtc1.d $v0, $f10
+  	cvt.d.w $f10, $f10 # $f10 <- 7!
+  	# $f12 contem o valor de X, argumento da funcao exponencial
+   	addi $a0, $zero, 7
    	jal exponencial
-   	mov.d $f8, $f10
-   	# $f8 <- x^3
-	# $f12 contem o valor de X
-   	addi $a1, $zero, 5
-   	jal exponencial
-   	mov.d $f14, $f10
-   	# $f14 <- x^5   	
-   	# $f12 contem o valor de X
-   	addi $a1, $zero, 7
-   	jal exponencial
-   	mov.d $f16, $f10
-   	# $f16 <- x^7
-   	# chama o procedimento para realizar os calculos 
-    jal calcula_valor_funcao
-    # $f10 contem o resultado
+   	mov.d $f16, $f0 # $f16 <- x^7
+   	div.d $f10, $f16, $f10 # $f10 <- (x^7)/7!
+   	sub.d $f0, $f12, $f4 # $f0 <- x - ((x^3)/3!)
+   	sub.d $f6, $f6, $f10 # $f6 <- ((x^5)/5!)-((x^7)/7!)
+   	add.d $f0, $f0, $f6 # $f0 <- $f0 + $f6
+    # $f0 contem o resultado
     j funcao_fim # finaliza o procedimento
 	funcao_retorna_zero:
-		ldc1 $f10, const_zero # $f10 <- 0
+		ldc1 $f0, const_zero # $f0 <- 0
 		
 	#epilogo
 	funcao_fim:
@@ -109,32 +108,6 @@ funcao:
 		jr $ra
 ###############################################################################
 
-###############################################################################
-# faz os calculos da funcao f(x)
-calcula_valor_funcao:
-	#corpo
-	# $f12 <- contem o valor de X
-  	# $f2 <- 3!
-  	# $f4 <- 5!
-  	# $f6 <- 7!
-   	# $f8 <- x^3
-   	# $f14 <- x^5
-   	# $f16 <- x^7 
-   	div.d $f2, $f8, $f2
-   	# $f2 <- x^3/3!
-   	div.d $f4, $f14, $f4
-   	# $f4 <- x^5/5!
-   	div.d $f6, $f16, $f6
-   	# $f6 <- x^7/7!
-   	sub.d $f0, $f12, $f2
-   	# $f0 <- x - (x^3/3!)
-   	sub.d $f2, $f4, $f6
-   	# $f2 <- (x^5/5!)-(x^7/7!)
-   	add.d $f10, $f0, $f2
-   	# $f10 <- $f0 + $f2
-	jr $ra
-###############################################################################
-	
 
 ###############################################################################
 # imprime uma mensagem, pedindo a entrada de um numero
@@ -149,15 +122,15 @@ leia_numero_pf:
 ###############################################################################
 
 ###############################################################################
-# funcao que calcula o exponencial de um numero em ponto flutuante com precisao dupla
+# procedimento que calcula o exponencial de um numero em ponto flutuante com precisao dupla
 exponencial:
     	addiu $sp, $sp, -4
     	sw $s0, 0($sp)
     	li $s0, 0
-    	ldc1 $f10, const_um
+    	ldc1 $f0, const_um
     exponencial_loop:
-    	beq	$s0, $a1, exponencial_end
-    	mul.d $f10,	$f10, $f12
+    	beq	$s0, $a0, exponencial_end
+    	mul.d $f0, $f0, $f12
     	addi $s0, $s0, 1
     	j exponencial_loop
     exponencial_end:
