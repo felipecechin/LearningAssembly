@@ -1,3 +1,6 @@
+# Alunos: Bruno Frizzo e Felipe Cechin
+# Exercicio 3 - trabalho 2 parte 3
+
 .data
 	msg_digite_numero: .asciiz "Digite um numero: "
 	msg_resultado_funcao: .asciiz "Resultado de f(x): "
